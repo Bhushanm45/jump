@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:sans-serif; padding:20px;">
+  <h3>Mario Jump Sound</h3>
+  <button onclick="play(1)" style="padding:10px 20px; margin:5px;">▶ Normal</button>
+  <button onclick="play(0.5)" style="padding:10px 20px; margin:5px;">🐢 0.5x Slow</button>
+  <button onclick="play(2)" style="padding:10px 20px; margin:5px;">🐇 2x Fast</button>
+
+<script>
+function play(speed) {
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "square";
+
+  // Base duration: 0.15s (normal Mario jump)
+  const dur = 0.15 / speed;
+
+  // Exact Mario: D4 (293.66) → C#4 (277.18) dip → rise to D5 (587.33)
+  const D4 = 293.66;
+  const CS4 = 277.18;
+  const D5 = 587.33;
+
+  const t = ctx.currentTime;
+
+  // Start at D4
+  osc.frequency.setValueAtTime(D4, t);
+  // Quick dip to C#4
+  osc.frequency.setValueAtTime(CS4, t + dur * 0.1);
+  // Rapid chromatic rise to D5
+  osc.frequency.exponentialRampToValueAtTime(D5, t + dur * 0.9);
+
+  // Envelope: fast attack, quick decay
+  gain.gain.setValueAtTime(0.5, t);
+  gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + dur);
+}
+</script>
+</body>
+</html>   
